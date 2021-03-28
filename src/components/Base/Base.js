@@ -12,7 +12,7 @@ import Avatar from 'antd/lib/avatar/avatar';
 
 const { Header, Footer, Sider, Content } = Layout;
 
-function Base({ children, location }) {
+function Base({ children, ...props }) {
   const auth = useAuth();
   const [collapsed, setCollapsed] = React.useState(() => {
     return localStorage.getItem('collapsed') || false
@@ -70,7 +70,7 @@ function Base({ children, location }) {
             className="site-layout-background"
             style={{ margin: '24px 16px', padding: 24, minHeight: 280, }}
           >
-            {children}
+            {React.cloneElement(children, { ...props })}
           </Content>
 
           <Footer style={{ textAlign: 'center' }}>©2021 DFL Transportes</Footer>

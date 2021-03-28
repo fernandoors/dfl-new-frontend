@@ -1,26 +1,28 @@
-import { Input, Table } from 'antd';
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { Button, Input, Table } from 'antd';
 import api from '../../../service/api';
-import { Container } from './UserList.style';
+import * as S from './UserList.style';
+import addKeyToData from '../../../utils/addKeyToData';
+import Title from '../../../components/Title/Title';
 const { Search } = Input;
 
 function UserList() {
   const [users, setUsers] = useState([])
   const [usersSearched, setUsersSearched] = useState([])
   const [search, setSearch] = useState('')
-  const [page, setPage] = useState({ current: 1, pagination: 1 })
+  const [page, setPage] = useState({ current: 1, pagination: 1, pageSize: 10 })
 
   useEffect(() => {
     async function getUser() {
       const { data: content } = await api.get(`/v1/admin/users?limit=5000&fields=phones`)
       const userConverted = content.data.map(user => ({
-        ...user, key: user.id,
-        phones: user.phones.map(phone => phone.number)
+        ...addKeyToData(user), phones: user.phones.map(phone => phone.number)
       }
       ))
       setUsersSearched(userConverted)
       setUsers(userConverted)
-      setPage(prev => ({ ...prev, total: content.pagination.total, pageSize: 10 }))
+      setPage(prev => ({ ...prev, total: content.pagination.total, }))
     }
     getUser()
   }, [])
@@ -30,13 +32,18 @@ function UserList() {
       title: 'Usuário',
       dataIndex: 'username',
       key: 'username',
-      render: text => <p>{text}</p>,
+      defaultSortOrder: 'ascend',
+      showSorterTooltip: false,
+      sorter: (a, b) => a.username.localeCompare(b.username),
+      render: username => <Link to={`/usuarios/editar/${username}`}>{username}</Link>,
     },
     {
       title: 'Nome',
       dataIndex: 'name',
       key: 'name',
       responsive: ['lg'],
+      showSorterTooltip: false,
+      sorter: (a, b) => a.name.localeCompare(b.name),
     },
     {
       title: 'Telefone(s)',
@@ -56,14 +63,26 @@ function UserList() {
     setPage(prev => ({ ...prev, total: usersFound.length }))
   }
   return (
-    <Container>
-      <Search
-        allowClear
-        value={search}
-        onChange={handleSearch}
-        placeholder="Buscar Usuário"
-        style={{ width: 200, marginBottom: 20 }}
-      />
+    <S.Container>
+      <Title title={'Usuários'} />
+      <S.Row>
+        <div>
+          <Search
+            allowClear
+            value={search}
+            onChange={handleSearch}
+            placeholder="Buscar Usuário"
+            style={{ width: 200, marginBottom: 20 }}
+          />
+        </div>
+        <div>
+          <Link to='/usuarios/editar/novo-usuario'>
+            <Button>
+              Criar Usuário
+            </Button>
+          </Link>
+        </div>
+      </S.Row>
       <Table
         columns={columns}
         dataSource={usersSearched}
@@ -73,7 +92,7 @@ function UserList() {
           setPage(prev => ({ ...prev, ...pages, pagination: pages.current }))
         }}
       />
-    </Container >
+    </S.Container >
   )
 }
 

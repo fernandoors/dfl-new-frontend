@@ -9,9 +9,9 @@ function PrivateRoute({ component, ...rest }) {
     <Route
       exact
       {...rest}
-      render={({ location }) =>
+      render={({ location, ...props }) =>
         auth.user ? (
-          <Base location={location}>{component}</Base>
+          <Base {...props} >{component}</Base>
         ) : (
           <Redirect
             to={{
