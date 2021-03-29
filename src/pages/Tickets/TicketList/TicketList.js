@@ -16,6 +16,8 @@ function TicketList() {
   const [departments, setDepartments] = useState([])
   const [ticketSearched, setTicketSearched] = useState([])
   const [search, setSearch] = useState('')
+  const [sort, setSort] = useState('')
+  const [statusFilter, setStatusFilter] = useState('')
   const [page, setPage] = useState({ current: 1, pagination: 1, pageSize: 10 })
 
   useEffect(() => {
@@ -33,7 +35,18 @@ function TicketList() {
   function handleChangePage(newPage) {
     setLoad(true)
     async function getTickets() {
-      const { data: content } = await api.get(`/v1/admin/tickets?page=${newPage}&title=${search}`)
+      const { data: content } = await api.get(`/v1/admin/tickets?page=${newPage}&title=${search}&status=${statusFilter}`)
+      const ticketConverted = content.data.map(addKeyToData)
+      setTicketSearched(ticketConverted)
+      setLoad(false)
+      setPage(prev => ({ ...prev, total: content.pagination.total }))
+    }
+    getTickets()
+  }
+  function handleChangeStatus(status) {
+    setLoad(true)
+    async function getTickets() {
+      const { data: content } = await api.get(`/v1/admin/tickets?status=${status}&title=${search}`)
       const ticketConverted = content.data.map(addKeyToData)
       setTicketSearched(ticketConverted)
       setLoad(false)
@@ -44,7 +57,7 @@ function TicketList() {
   function handleSearch(name) {
     setLoad(true)
     async function getTickets() {
-      const { data: content } = await api.get(`/v1/admin/tickets?title=${name}`)
+      const { data: content } = await api.get(`/v1/admin/tickets?title=${name}&status=${statusFilter}`)
       const ticketConverted = content.data.map(addKeyToData)
       setTicketSearched(ticketConverted)
       setLoad(false)
@@ -77,8 +90,9 @@ function TicketList() {
       dataIndex: 'status',
       key: 'status',
       width: 150,
-      onFilter: (value, record) => record.status.indexOf(value) === 0,
+      filterMultiple: false,
       filters: statusArrayObject,
+      onFilter: (value, record) => record.status.indexOf(value) === 0,
       render: status => (
         <Tag color={statusToColor[status]}>
           {statusContent[status].toUpperCase()}
@@ -127,9 +141,21 @@ function TicketList() {
           dataSource={ticketSearched}
           loading={load}
           pagination={page}
-          onChange={pages => {
-            handleChangePage(pages.current)
-            setPage(prev => ({ ...prev, ...pages, pagination: pages.current }))
+          onChange={(pages, filter, changeSort) => {
+            if (changeSort.order !== sort) {
+              setSort(changeSort.order)
+              return
+            }
+            if (page.pagination !== pages.current) {
+              handleChangePage(pages.current)
+              setPage(prev => ({ ...prev, ...pages, pagination: pages.current }))
+            } else if (!!filter.status && statusFilter !== filter.status[0]) {
+              setStatusFilter(filter.status[0])
+              handleChangeStatus(filter.status[0])
+            } else {
+              setStatusFilter('')
+              handleChangeStatus('')
+            }
           }}
         />
       </S.Container >
