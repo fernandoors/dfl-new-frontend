@@ -13,5 +13,5 @@ export const statusToColor = {
 }
 
 export const statusArrayObject = Object.entries(statusContent).map(content => (
-  { key: content[0], value: content[1], text: content[1], color: statusToColor[content[0]] }
+  { key: content[0], value: content[0], text: content[1], color: statusToColor[content[0]] }
 ))

@@ -3,7 +3,7 @@ import { Button, Table, Input, Tag } from "antd";
 import { Link } from "react-router-dom";
 import api from "../../../service/api";
 import addKeyToData from "../../../utils/addKeyToData";
-import { statusContent, statusToColor } from "../../../utils/statusConvert";
+import { statusArrayObject, statusContent, statusToColor } from "../../../utils/statusConvert";
 import convertTableFilter from "../../../utils/convertTableFilter";
 import * as S from "./TicketList.style";
 import dayjs from "dayjs";
@@ -78,7 +78,7 @@ function TicketList() {
       key: 'status',
       width: 150,
       onFilter: (value, record) => record.status.indexOf(value) === 0,
-      filters: departments,
+      filters: statusArrayObject,
       render: status => (
         <Tag color={statusToColor[status]}>
           {statusContent[status].toUpperCase()}
