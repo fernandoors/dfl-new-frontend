@@ -1,15 +1,19 @@
-import { Button, Card, Input, Select, Spin } from "antd";
+import { Button, Card, Input, message, Select, Spin } from "antd";
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router";
 import ShowingComponent from "../../../components/Showing/ShowingComponent";
 import Title from "../../../components/Title/Title";
+import { useAuth } from "../../../hooks/auth";
 import api from "../../../service/api";
 import sortByIdDesc from "../../../utils/sortByIdDesc";
 import { statusArrayObject } from "../../../utils/statusConvert";
 import * as S from "./TicketCreate.style"
-function TicketCreate() {
+function TicketCreate({ history }) {
+  const { user } = useAuth();
   const [ticket, setTicket] = useState({})
+  const [comments, setComments] = useState([])
+  const [newComment, setNewComments] = useState('')
   const [departments, setDepartments] = useState([])
   const [load, setLoad] = useState(true)
   const { id } = useParams();
@@ -21,6 +25,8 @@ function TicketCreate() {
     if (id !== 'novo-ticket') {
       async function getTicket() {
         const { data: content } = await api.get(`/v1/admin/tickets/${id}?fields=comments`)
+        setComments(content.comments)
+        delete content.comments
         setTicket(content)
       }
       setLoad(false)
@@ -31,9 +37,6 @@ function TicketCreate() {
     getDepartment()
   }, [id])
   function handleContentEdit(event) {
-    setTicket(prev => ({ ...prev, [event.target.name]: event.target.value }))
-  }
-  function handleCommentCreate(event) {
     setTicket(prev => ({ ...prev, [event.target.name]: event.target.value }))
   }
   function handleSelectedStatus(status) {
@@ -49,11 +52,47 @@ function TicketCreate() {
     return <Spin size='large' />
   }
   const notNew = id !== 'novo-ticket'
+
+  async function saveTicket() {
+    setLoad(true)
+    const method = notNew ? 'PATCH' : 'POST'
+    message.loading('Salvando chamado')
+    await api.request({
+      url: `/v1/admin/tickets/` + (notNew ? id : ''),
+      method,
+      data: { ...ticket, user_id: user.id }
+    }).then(({ data }) => {
+      message.success('Chamado salvo')
+      if (!notNew)
+        history.push('/chamados/editar/' + data.id)
+    })
+    setLoad(false)
+  }
+  async function saveComment() {
+    if (!!newComment.length) {
+      message.loading('Salvando comentário')
+      await api.request({
+        url: `/v1/admin/comments`,
+        method: 'POST',
+        data: {
+          description: newComment,
+          ticket_id: id,
+          user_id: user.id,
+        }
+      }).then(({ data }) => {
+        setNewComments('')
+        message.success('Comentário salvo')
+        setComments(prev => [...prev, data])
+      })
+    } else {
+      message.error('Insira o comentário')
+    }
+  }
   return (
     <S.Container>
       <Title title={notNew ? 'Editar Chamado' : 'Criar Chamado'} />
       <main>
-        <Card title={notNew ? 'Título: ' + ticket.title : 'Ticket'} extra={<Button type="primary">{notNew ? 'Salvar' : 'Criar'}</Button>}>
+        <Card title={notNew ? 'Título: ' + ticket.title : 'Ticket'} extra={<Button onClick={saveTicket} type="primary">{notNew ? 'Atualizar' : 'Criar'}</Button>}>
           <form onSubmit={handleSubmit}>
             <ShowingComponent show={notNew}>
               <S.Row row='space-between'>
@@ -83,7 +122,7 @@ function TicketCreate() {
             </S.Row>
             <S.Row row='space-between' margin='0'>
               <S.Row>
-                <label htmlFor="status">Departamento:</label>
+                <label htmlFor="department">Departamento:</label>
                 {departments.length &&
                   <Select value={ticket.department_id} onSelect={handleSelectedDepartment} name="department">
                     {departments.map(department => (
@@ -99,23 +138,21 @@ function TicketCreate() {
         <ShowingComponent show={notNew}>
           <S.Cards>
             <Card hoverable title='Atualizações'>
-              <Card title={'Novo Comentário'} extra={<Button type="primary">Salvar</Button>}>
+              <Card title={'Novo Comentário'} extra={<Button onClick={saveComment} type="primary">Criar</Button>}>
                 <S.Row row='center'>
-                  <Input.TextArea style={{ minHeight: 300 }} type="text" name="newComment" onChange={handleCommentCreate} value={ticket.newComment || ''} />
+                  <Input.TextArea style={{ minHeight: 300 }} type="text" name="newComment" onChange={e => setNewComments(e.target.value)} value={newComment} />
                 </S.Row>
               </Card>
-              {ticket.comments && (
-                ticket.comments.length && ticket.comments.sort(sortByIdDesc).map(comment => (
-                  <Card
-                    title={comment.user.name} key={comment.id}
-                  // extra={<Button type="primary">Salvar</Button>}
-                  >
-                    <p>Criado em: {dayjs(comment.created_at).format('DD-MM-YYYY')}</p>
-                    <S.Row row='center'>
-                      <Input.TextArea disabled value={comment.description || ''} />
-                    </S.Row>
-                  </Card>
-                )))}
+              {!comments.length ? null : comments.sort(sortByIdDesc).map(comment => (
+                <Card
+                  title={comment.user.name} key={comment.id}
+                >
+                  <p>Criado em: {dayjs(comment.created_at).format('DD-MM-YYYY')}</p>
+                  <S.Row row='center'>
+                    <Input.TextArea disabled value={comment.description || ''} />
+                  </S.Row>
+                </Card>
+              ))}
             </Card>
           </S.Cards>
         </ShowingComponent>

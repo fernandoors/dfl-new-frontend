@@ -24,13 +24,15 @@ export const parseJwt = (token) => {
 function useProvideAuth() {
   const [user, setUser] = useState(() => {
     const token = localStorage.getItem('token')
+    const userSaved = localStorage.getItem('user')
     if (!!token) {
       const { exp } = parseJwt(token)
       const tokenIsValid = (!!exp && Date.now() >= exp * 1000) ? null : { token }
       if (!tokenIsValid) {
         localStorage.setItem('token', '')
+        localStorage.setItem('user', '')
       }
-      return tokenIsValid
+      return { ...tokenIsValid, ...JSON.parse(userSaved) }
     }
     return null
   });
@@ -42,6 +44,7 @@ function useProvideAuth() {
       const { data: userData } = await api.get('/v1/me', { headers: { Authorization: 'Bearer ' + token } })
       setUser({ token, ...userData })
       localStorage.setItem('token', token)
+      localStorage.setItem('user', JSON.stringify(userData))
       cb()
     } catch (error) {
       setLoginFail(true)
@@ -50,6 +53,7 @@ function useProvideAuth() {
   const signout = () => {
     return api.get('/v1/auth/logout', useToken).then(() => {
       localStorage.setItem('token', '')
+      localStorage.setItem('user', '')
       setUser(null);
     })
   };
