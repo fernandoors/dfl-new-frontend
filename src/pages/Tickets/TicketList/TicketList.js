@@ -71,6 +71,7 @@ function TicketList() {
       dataIndex: 'department',
       key: 'department',
       filters: departments,
+      filterMultiple: false,
       onFilter: (value, record) => record.department.name.indexOf(value) === 0,
       render: department => <p>{department.name}</p>,
     },
@@ -142,11 +143,10 @@ function TicketList() {
           loading={load}
           pagination={page}
           onChange={(pages, filter, changeSort) => {
-            if (changeSort.order !== sort) {
+            if (changeSort.order && changeSort.order !== sort) {
               setSort(changeSort.order)
               return
-            }
-            if (page.pagination !== pages.current) {
+            } else if (page.pagination !== pages.current) {
               handleChangePage(pages.current)
               setPage(prev => ({ ...prev, ...pages, pagination: pages.current }))
             } else if (!!filter.status && statusFilter !== filter.status[0]) {
