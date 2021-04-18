@@ -17,22 +17,22 @@ export default function Routes() {
 
       <PrivateRoute exact path="/" component={<Home />} />
 
-      <PrivateRoute exact component={<TicketList />} path='/chamados' />
-      <PrivateRoute component={<TicketCreate />} path='/chamados/editar/:id' />
-      <PrivateRoute component={<Home />} path='/controle-de-cargas' />
-      <PrivateRoute component={<Home />} path='/sala-de-reuniao' />
-      <PrivateRoute component={<Home />} path='/crm' />
-      <PrivateRoute component={<Home />} path='/controle-de-estoque' />
-      <PrivateRoute component={<Home />} path='/inventario' />
-      <PrivateRoute component={<Home />} path='/vouchers-internet' />
-      <PrivateRoute component={<Home />} path='/promocao' />
-      <PrivateRoute component={<Home />} path='/cidades-de-entrega' />
-      <PrivateRoute component={<Home />} path='/comprovantes' />
-      <PrivateRoute component={<Home />} path='/dfl-tv' />
-      <PrivateRoute component={<Home />} path='/marketing' />
-      <PrivateRoute component={<Home />} path='/consulta-st' />
-      <PrivateRoute exact component={<UserList />} path='/usuarios' />
-      <PrivateRoute component={<UserCreate />} path='/usuarios/editar/:username' />
+      <PrivateRoute roles={['read']} exact component={<TicketList />} path='/chamados' />
+      <PrivateRoute roles={['create', 'update']} component={<TicketCreate />} path='/chamados/editar/:id' />
+      <PrivateRoute roles={['read']} component={<Home />} path='/controle-de-cargas' />
+      <PrivateRoute roles={['read']} component={<Home />} path='/sala-de-reuniao' />
+      <PrivateRoute roles={['read']} component={<Home />} path='/crm' />
+      <PrivateRoute roles={['read']} component={<Home />} path='/controle-de-estoque' />
+      <PrivateRoute roles={['read']} component={<Home />} path='/inventario' />
+      <PrivateRoute roles={['read']} component={<Home />} path='/vouchers-internet' />
+      <PrivateRoute roles={['read']} component={<Home />} path='/promocao' />
+      <PrivateRoute roles={['read']} component={<Home />} path='/cidades-de-entrega' />
+      <PrivateRoute roles={['read']} component={<Home />} path='/comprovantes' />
+      <PrivateRoute roles={['read']} component={<Home />} path='/dfl-tv' />
+      <PrivateRoute roles={['read']} component={<Home />} path='/marketing' />
+      <PrivateRoute roles={['read']} component={<Home />} path='/consulta-st' />
+      <PrivateRoute roles={['read']} exact component={<UserList />} path='/usuarios' />
+      <PrivateRoute roles={['create', 'update']} component={<UserCreate />} path='/usuarios/editar/:username' />
     </Switch>
   )
 }
