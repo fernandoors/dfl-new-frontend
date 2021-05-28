@@ -11,22 +11,16 @@ function PrivateRoute({ component, roles, path, ...rest }) {
     <Route
       exact
       {...rest}
-      render={({ location, ...props }) =>
-        user && checkPermission(user.permissions, roles, path) ? (
-          <Base {...props} >{component}</Base>
-        ) : user ? <Redirect
-          to={{
-            pathname: "/",
-            state: { from: location }
-          }}
-        /> : (
-          <Redirect
-            to={{
-              pathname: "/login",
-              state: { from: location }
-            }}
-          />
-        )
+      render={({ location, ...props }) => {
+        const state = { from: location }
+        if (user && checkPermission(user.permissions, roles, path)) {
+          return <Base {...props} >{component}</Base>
+        }
+        if (user) {
+          return <Redirect to={{ pathname: '/', state }} />
+        }
+        return <Redirect to={{ pathname: "/login", state }} />
+      }
       }
     />
   );

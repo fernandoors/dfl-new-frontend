@@ -58,7 +58,7 @@ function Base({ children, ...props }) {
             >
               {!!auth.user.image
                 ? <S.Image
-                  src={auth.user.image}
+                  src={auth.user.image.url}
                   style={{ width: 32, height: 32, margin: 15, borderRadius: '50%' }}
                   alt='Sua foto - Ao Clicar, abre um menu inferior para deslogar da página'
                 />

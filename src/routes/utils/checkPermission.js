@@ -4,7 +4,7 @@ export default function checkPermission(userPermissions, roles, path) {
   if (path === '/') {
     return true
   }
-  const routePermission = links.find(link => link.to === path).permission
+  const routePermission = links.find(link => link.to.includes(path.split('/')[0])).permission
   const hasRole = roles.filter(role => {
     return userPermissions.includes(`${role}_${routePermission}`)
   })
