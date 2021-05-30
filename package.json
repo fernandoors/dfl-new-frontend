@@ -19,8 +19,9 @@
     "web-vitals": "^1.0.1"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
+    "start": "REACT_APP_API=https://dflab.fdoors.com.br react-scripts start",
+    "start-local": "REACT_APP_API=http://localhost:3333 react-scripts start",
+    "build": "REACT_APP_API=https://dfl.fdoors.com.br react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
